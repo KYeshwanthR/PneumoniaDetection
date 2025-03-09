@@ -1,7 +1,4 @@
 # Pneumonia Detection
-
-This project uses a pre-trained EfficientNet model to detect pneumonia from X-ray images. The model is deployed using Streamlit for a web-based interface.
-
 ## Requirements
 
 Make sure you have the required packages installed. You can install them using the following command:
