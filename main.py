@@ -69,7 +69,7 @@ if uploaded_file is not None:
 
     image_path = "uploaded_image.jpg"
 
-    st.image(image_path, caption="Uploaded Image", use_column_width=True)
+    st.image(image_path, caption="Uploaded Image", UseColumnWith=True)
 
     with st.spinner("Analyzing the image..."):
         predicted_class, probabilities, rgb_img, input_tensor = predict_pneumonia(image_path, model, device)
@@ -82,4 +82,4 @@ if uploaded_file is not None:
 
         visualization = visualize_gradcam(model, input_tensor, rgb_img, predicted_class)
 
-        st.image(visualization, caption="Grad-CAM Visualization", use_column_width=True)
+        st.image(visualization, caption="Grad-CAM Visualization", UseColumnWith=True)
