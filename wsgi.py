@@ -1,6 +1,7 @@
-import os
-from app import app as application
+import sys
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    application.run(host='0.0.0.0', port=port)
+project_home = '/path/to/your/project'
+if project_home not in sys.path:
+    sys.path.insert(0, project_home)
+
+from app import app as application
