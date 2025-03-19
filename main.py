@@ -11,15 +11,19 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 import torch.nn as nn
 import cv2
 
+device = torch.device("cpu")
 model = torchvision.models.efficientnet_v2_l(weights=None)
 
 num_ftrs = model.classifier[1].in_features
 model.classifier[1] = nn.Linear(num_ftrs, 2)
 
-model_weights_path = 'WeightsFile.pth'
-model.load_state_dict(torch.load(model_weights_path, map_location=torch.device('cpu'), weights_only=True))
+try:
+    model_weights_path = 'WeightsFile.pth'
+    model.load_state_dict(torch.load(model_weights_path, map_location=device))
+except Exception as e:
+    st.error(f"Error loading model weights: {str(e)}")
+    st.stop()
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 model.eval()
 
@@ -64,22 +68,30 @@ st.title("Pneumonia Detection")
 uploaded_file = st.file_uploader("Upload an X-ray Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    with open("uploaded_image.jpg", "wb") as f:
-        f.write(uploaded_file.getbuffer())
+    try:
+        import tempfile
+        import os
+        
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+            tmp_file.write(uploaded_file.getbuffer())
+            image_path = tmp_file.name
 
-    image_path = "uploaded_image.jpg"
+        st.image(image_path, caption="Uploaded Image",use_column_width=True)
 
-    st.image(image_path, caption="Uploaded Image",use_column_width=True)
+        with st.spinner("Analyzing the image..."):
+            predicted_class, probabilities, rgb_img, input_tensor = predict_pneumonia(image_path, model, device)
+            prediction = "Pneumonia" if predicted_class == 1 else "Normal"
 
-    with st.spinner("Analyzing the image..."):
-        predicted_class, probabilities, rgb_img, input_tensor = predict_pneumonia(image_path, model, device)
-        prediction = "Pneumonia" if predicted_class == 1 else "Normal"
+            st.write(f"### Prediction: {prediction}")
+            st.write(f"#### Probabilities:")
+            st.write(f"- Normal: {probabilities[0]:.4f}")
+            st.write(f"- Pneumonia: {probabilities[1]:.4f}")
 
-        st.write(f"### Prediction: {prediction}")
-        st.write(f"#### Probabilities:")
-        st.write(f"- Normal: {probabilities[0]:.4f}")
-        st.write(f"- Pneumonia: {probabilities[1]:.4f}")
+            visualization = visualize_gradcam(model, input_tensor, rgb_img, predicted_class)
 
-        visualization = visualize_gradcam(model, input_tensor, rgb_img, predicted_class)
+            st.image(visualization, caption="Grad-CAM Visualization",use_column_width=True)
 
-        st.image(visualization, caption="Grad-CAM Visualization",use_column_width=True)
+        # Clean up the temporary file
+        os.unlink(image_path)
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
