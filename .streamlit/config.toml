@@ -3,7 +3,3 @@ level = "error"
 
 [client]
 showErrorDetails = false
-
-[server]
-enableCORS = false
-enableXsrfProtection = false
