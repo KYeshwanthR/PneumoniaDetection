@@ -19,8 +19,7 @@ model.classifier[1] = nn.Linear(num_ftrs, 2)
 
 try:
     model_weights_path = 'WeightsFile.pth'
-    state_dict = torch.load(model_weights_path, map_location=device, weights_only=True)
-    model.load_state_dict(state_dict)
+    model.load_state_dict(torch.load(model_weights_path, map_location=device))
 except Exception as e:
     st.error(f"Error loading model weights: {str(e)}")
     st.stop()
