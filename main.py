@@ -19,7 +19,8 @@ model.classifier[1] = nn.Linear(num_ftrs, 2)
 
 try:
     model_weights_path = 'WeightsFile.pth'
-    model.load_state_dict(torch.load(model_weights_path, map_location=device))
+    state_dict = torch.load(model_weights_path, map_location=device, weights_only=True)
+    model.load_state_dict(state_dict)
 except Exception as e:
     st.error(f"Error loading model weights: {str(e)}")
     st.stop()
@@ -91,7 +92,6 @@ if uploaded_file is not None:
 
             st.image(visualization, caption="Grad-CAM Visualization",use_column_width=True)
 
-        # Clean up the temporary file
         os.unlink(image_path)
     except Exception as e:
         st.error(f"Error processing image: {str(e)}")
